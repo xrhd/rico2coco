@@ -1,0 +1,34 @@
+name: Build and deploy
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    if: github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+
+    env:
+      COMPOSE_FILE: "rico2coco/docker-compose.yml"
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - uses: actions/cache@v1
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/poetry.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+
+    - name: Build image
+      run: docker-compose build
+
+    - name: Run tests
+      run: |
+        docker-compose run rico2coco make test
+        docker-compose down -v
+  
