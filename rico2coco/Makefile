@@ -1,3 +1,6 @@
+install:
+	poetry install
+
 test:
 	pytest . $(PYTEST_OPTIONS)
 
