@@ -2,6 +2,7 @@ import pandas as pd
 
 from rico2coco.metadata import rico_metadata
 
+
 def get_info():
     return {
         "year": "2021",
@@ -9,13 +10,13 @@ def get_info():
         "description": "Custum Rico Dataset in Coco format.",
         "contributor": "xrhd",
         "url": "",
-        "date_created": ""
+        "date_created": "",
     }
 
+
 def get_licenses():
-    return [
-        {}
-    ]
+    return [{}]
+
 
 def get_categories(component_legend: pd.DataFrame = rico_metadata.component_legend):
     for i, label_name in enumerate(component_legend):
@@ -23,13 +24,14 @@ def get_categories(component_legend: pd.DataFrame = rico_metadata.component_lege
 
 
 def get_images(ui_details: pd.DataFrame = rico_metadata.ui_detail):
+    width, height = 1080, 1920  # img.size
     for ui_id in ui_details["UI Number"]:
-        # image
-        img_id = int(ui_id) + 1
-        img_name = f"{ui_id}.jpg"
-
-        width, height = 1080, 1920  # img.size
-        yield {"id": img_id, "height": height, "width": width, "file_name": img_name}
+        yield {
+            "id": int(ui_id) + 1,
+            "height": height,
+            "width": width,
+            "file_name": f"{ui_id}.jpg",
+        }
 
 
 def get_annotations(semantic_annotation: dict):
