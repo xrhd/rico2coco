@@ -6,5 +6,5 @@ test:
 	pytest . $(PYTEST_OPTIONS)
 
 format:
-	isort .
-	black .
+	isort rico2coco tests
+	black rico2coco tests
