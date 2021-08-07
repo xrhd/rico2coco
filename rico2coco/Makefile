@@ -3,7 +3,7 @@ install:
 
 test: format
 test:
-	pytest . $(PYTEST_OPTIONS)
+	pytest tests $(PYTEST_OPTIONS)
 
 format:
 	isort rico2coco tests
