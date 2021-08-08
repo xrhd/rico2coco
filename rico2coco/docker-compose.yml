@@ -3,3 +3,6 @@ services:
   rico2coco:
     build:
       context: ./
+    volumes: 
+      - "./:/workspace"
+
