@@ -45,10 +45,10 @@ def get_annotations(
     categories_map: dict = {obj["name"]: obj["id"] for obj in get_categories()},
 ):
     anotatiin_id = 0
+
     for ui_id in ui_details["UI Number"]:
         view_hierarchy_file_path = f"{rico_dataset_path}/{ui_id}.json"
         view_hierarchy = json.load(open(view_hierarchy_file_path))
-
         components = get_components_from_view_hierarchy(
             view_hierarchy["activity"]["root"]
         )
@@ -58,6 +58,7 @@ def get_annotations(
             x0, y0, x1, y1 = list(np.array(bounds) * COMPRESSION_FACTOR)
             area = (y1 - y0) * (x1 - x0)
             bbox = (x0, y0, x1 - x0, y1 - y0)
+            
             yield {
                 "id": anotatiin_id,
                 "image_id": int(ui_id) + 1,
