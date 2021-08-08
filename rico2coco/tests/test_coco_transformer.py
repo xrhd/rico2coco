@@ -17,9 +17,12 @@ def test_get_licenses():
 def test_get_images():
     image_data = next(get_images())
     assert isinstance(image_data, dict)
-    for attribute in  ["id", "height", "width", "file_name"]: 
+    for attribute in ["id", "height", "width", "file_name"]:
         assert attribute in image_data
 
 
 def test_get_annotations():
-    pass
+    annotations = next(get_annotations())
+    assert isinstance(annotations, dict)
+    for attribute in ["id", "image_id", "category_id", "bbox", "area"]:
+        assert attribute in annotations
