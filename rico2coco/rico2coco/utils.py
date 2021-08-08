@@ -2,6 +2,9 @@ def get_components_from_view_hierarchy(view_hierarchy):
     components = []
 
     def _get_componets(componet):
+        if not componet:
+            return
+
         if "bounds" in componet:
             components.append(
                 (componet.get("componentLabel", "background"), componet.get("bounds"))
