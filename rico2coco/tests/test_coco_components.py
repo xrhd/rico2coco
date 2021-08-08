@@ -1,4 +1,4 @@
-from rico2coco.coco_transformer import (
+from rico2coco.coco_components import (
     get_annotations,
     get_images,
     get_info,
