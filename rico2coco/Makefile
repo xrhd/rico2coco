@@ -1,8 +1,10 @@
 install:
 	poetry install
 
+test: format
 test:
-	pytest . $(PYTEST_OPTIONS)
+	pytest tests $(PYTEST_OPTIONS)
 
 format:
-	black .
+	isort rico2coco tests
+	black rico2coco tests
