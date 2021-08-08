@@ -58,7 +58,7 @@ def get_annotations(
             x0, y0, x1, y1 = list(np.array(bounds) * COMPRESSION_FACTOR)
             area = (y1 - y0) * (x1 - x0)
             bbox = (x0, y0, x1 - x0, y1 - y0)
-            
+
             yield {
                 "id": anotatiin_id,
                 "image_id": int(ui_id) + 1,
