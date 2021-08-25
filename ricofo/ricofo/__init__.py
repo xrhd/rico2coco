@@ -18,3 +18,10 @@ rico2coco_dataset = fo.Dataset.from_dir(
 )
 
 session = fo.launch_app(rico2coco_dataset)
+
+_quit = lambda: (input('Press q/Q to Quit')).lower() == "q"
+while _quit():
+    pass
+else:
+    print("Done!")
+
