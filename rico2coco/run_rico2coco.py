@@ -5,6 +5,6 @@ from rico2coco import run
 
 sys.path.append("./rico2coco")
 
-ricoco = run()
-with open("ricoco.json", "w") as f:
+ricoco = run(label_key="clickable")
+with open("ricoco_clickable.json", "w") as f:
     json.dump(ricoco, f)
