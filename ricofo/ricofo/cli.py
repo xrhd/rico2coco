@@ -9,8 +9,13 @@ from __init__ import *
     default=ANNOTATION_PATH,
     help="Path to coco format image annotations.",
 )
-def run(images, annotation):
-    main(images, annotation)
+@click.option(
+    "--samples",
+    default=MAX_SAMPLES,
+    help="Path to coco format image annotations.",
+)
+def run(images, annotation, samples):
+    main(images, annotation, samples)
 
 
 if __name__ == "__main__":
