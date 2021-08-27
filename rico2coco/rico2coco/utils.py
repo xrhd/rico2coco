@@ -6,8 +6,8 @@ def get_componentLabel(component):
 
 
 def get_clickable(component):
-    is_clickable = component.get("componentLabel", "background").lower()
-    if is_clickable == "true":
+    is_clickable = component.get("clickable", "background")
+    if is_clickable:
         return "clickable"
     return "not_clickable"
 
