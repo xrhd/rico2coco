@@ -1,7 +1,7 @@
-import sys
 import json
-from rico2coco import run
+import sys
 
+from rico2coco import run
 
 sys.path.append("./rico2coco")
 

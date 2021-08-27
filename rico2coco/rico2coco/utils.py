@@ -1,4 +1,6 @@
-from io import DEFAULT_BUFFER_SIZE
+import numpy as np
+
+from rico2coco.config import COMPRESSION_FACTOR
 
 
 def get_componentLabel(component):
@@ -37,3 +39,10 @@ def get_components_from_view_hierarchy(view_hierarchy, label_key="componentLabel
 
     _get_components(view_hierarchy)
     return components
+
+
+def decompose_bounds(bounds, compression_factor=COMPRESSION_FACTOR):
+    x0, y0, x1, y1 = list(np.array(bounds) * compression_factor)
+    area = (y1 - y0) * (x1 - x0)
+    bbox = (x0, y0, x1 - x0, y1 - y0)
+    return bbox, area

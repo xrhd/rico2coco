@@ -1,11 +1,10 @@
 import json
 
-import numpy as np
 import pandas as pd
 
-from rico2coco.config import COMPRESSION_FACTOR, RICO_DATASET_PATH
+from rico2coco.config import RICO_DATASET_PATH
 from rico2coco.metadata import rico_metadata
-from rico2coco.utils import get_components_from_view_hierarchy
+from rico2coco.utils import decompose_bounds, get_components_from_view_hierarchy
 
 
 def get_info():
@@ -51,8 +50,6 @@ def get_annotations(
     categories_map: dict = {obj["name"]: obj["id"] for obj in get_categories()},
     label_key: str = "componentLabel",
 ):
-    print(categories_map)
-
     anotatiin_id = 0
 
     for ui_id in ui_details["UI Number"]:
@@ -63,9 +60,7 @@ def get_annotations(
         for component_label, bounds in components:
             if component_label in categories_map and component_label != "background":
                 anotatiin_id += 1
-                x0, y0, x1, y1 = list(np.array(bounds) * COMPRESSION_FACTOR)
-                area = (y1 - y0) * (x1 - x0)
-                bbox = (x0, y0, x1 - x0, y1 - y0)
+                bbox, area = decompose_bounds(bounds)
 
                 yield {
                     "id": anotatiin_id,
