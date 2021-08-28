@@ -1,11 +1,10 @@
 import json
 
-import numpy as np
 import pandas as pd
 
-from rico2coco.config import COMPRESSION_FACTOR, RICO_DATASET_PATH
+from rico2coco.config import RICO_DATASET_PATH
 from rico2coco.metadata import rico_metadata
-from rico2coco.utils import get_components_from_view_hierarchy
+from rico2coco.utils import decompose_bounds, get_components_from_view_hierarchy
 
 
 def get_info():
@@ -23,7 +22,13 @@ def get_licenses():
     return [{}]
 
 
-def get_categories(component_legend: pd.DataFrame = rico_metadata.component_legend):
+def get_categories(
+    label_key: str = "componentLabel",
+    component_legend: pd.DataFrame = rico_metadata.component_legend,
+):
+    if label_key == "clickable":
+        component_legend = ["clickable", "not_clickable"]
+
     for i, label_name in enumerate(component_legend):
         yield {"supercategory": "none", "id": i + 1, "name": label_name}
 
@@ -43,22 +48,19 @@ def get_annotations(
     rico_dataset_path: str = RICO_DATASET_PATH,
     ui_details: pd.DataFrame = rico_metadata.ui_detail,
     categories_map: dict = {obj["name"]: obj["id"] for obj in get_categories()},
+    label_key: str = "componentLabel",
 ):
-    print(categories_map)
-
     anotatiin_id = 0
 
     for ui_id in ui_details["UI Number"]:
         view_hierarchy_file_path = f"{rico_dataset_path}/{ui_id}.json"
         view_hierarchy = json.load(open(view_hierarchy_file_path))
-        components = get_components_from_view_hierarchy(view_hierarchy)
+        components = get_components_from_view_hierarchy(view_hierarchy, label_key)
 
         for component_label, bounds in components:
             if component_label in categories_map and component_label != "background":
                 anotatiin_id += 1
-                x0, y0, x1, y1 = list(np.array(bounds) * COMPRESSION_FACTOR)
-                area = (y1 - y0) * (x1 - x0)
-                bbox = (x0, y0, x1 - x0, y1 - y0)
+                bbox, area = decompose_bounds(bounds)
 
                 yield {
                     "id": anotatiin_id,
