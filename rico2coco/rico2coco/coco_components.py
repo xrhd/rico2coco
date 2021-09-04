@@ -33,26 +33,31 @@ def get_categories(
         yield {"supercategory": "none", "id": i + 1, "name": label_name}
 
 
-def get_images(ui_details: pd.DataFrame = rico_metadata.ui_detail):
+def get_images(ui_details: pd.DataFrame = rico_metadata.ui_detail, valid_data_set=None):
+    image_id = 0
     width, height = 1080, 1920  # img.size
+
     for ui_id in ui_details["UI Number"]:
-        yield {
-            "id": int(ui_id) + 1,
-            "height": height,
-            "width": width,
-            "file_name": f"{ui_id}.jpg",
-        }
+        if ui_id in valid_data_set:
+            image_id += 1
+            yield {
+                "id": image_id,
+                "height": height,
+                "width": width,
+                "file_name": f"{ui_id}.jpg",
+            }
 
 
 def get_annotations(
+    coco_images,
     rico_dataset_path: str = RICO_DATASET_PATH,
-    ui_details: pd.DataFrame = rico_metadata.ui_detail,
     categories_map: dict = {obj["name"]: obj["id"] for obj in get_categories()},
     label_key: str = "componentLabel",
 ):
     anotatiin_id = 0
 
-    for ui_id in ui_details["UI Number"]:
+    for coco_image in coco_images:
+        ui_id = coco_image["file_name"].split(".").pop(0)
         view_hierarchy_file_path = f"{rico_dataset_path}/{ui_id}.json"
         view_hierarchy = json.load(open(view_hierarchy_file_path))
         components = get_components_from_view_hierarchy(view_hierarchy, label_key)
@@ -64,7 +69,7 @@ def get_annotations(
 
                 yield {
                     "id": anotatiin_id,
-                    "image_id": int(ui_id) + 1,
+                    "image_id": coco_image["id"],
                     "category_id": categories_map.get(component_label, 0),
                     "bbox": bbox,
                     "area": area,
