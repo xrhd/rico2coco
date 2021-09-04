@@ -1,1 +1,1 @@
-docker run -it -d --name yolov5 --ipc=host --gpus all -v "$(pwd)"/../ric2coco/rico/coco:/usr/src/coco ultralytics/yolov5:latest
+docker run -it -d --name yolov5 --ipc=host --gpus all -v "$(pwd)"/../rico2coco/rico/yolov5:/usr/src/rico2coco ultralytics/yolov5:latest
