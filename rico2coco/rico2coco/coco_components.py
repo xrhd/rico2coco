@@ -34,18 +34,18 @@ def get_categories(
 
 
 def get_images(ui_details: pd.DataFrame = rico_metadata.ui_detail, valid_data_set=None):
-    image_id = 1
+    image_id = 0
     width, height = 1080, 1920  # img.size
 
     for ui_id in ui_details["UI Number"]:
         if ui_id in valid_data_set:
+            image_id += 1
             yield {
                 "id": image_id,
                 "height": height,
                 "width": width,
                 "file_name": f"{ui_id}.jpg",
             }
-            image_id += 1
 
 
 def get_annotations(
@@ -69,7 +69,7 @@ def get_annotations(
 
                 yield {
                     "id": anotatiin_id,
-                    "image_id": int(ui_id) + 1,
+                    "image_id": coco_image["id"],
                     "category_id": categories_map.get(component_label, 0),
                     "bbox": bbox,
                     "area": area,
