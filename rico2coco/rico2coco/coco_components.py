@@ -24,12 +24,17 @@ def get_licenses():
 
 def get_categories(
     label_key: str = "componentLabel",
-    component_legend: pd.DataFrame = rico_metadata.component_legend,
 ):
     if label_key == "clickable":
-        component_legend = ["clickable", "not_clickable"]
+        legends = ["clickable", "not_clickable"]
 
-    for i, label_name in enumerate(component_legend):
+    elif label_key == "iconClass":
+        legends = rico_metadata.icon_legend
+
+    else:
+        legends = rico_metadata.component_legend
+
+    for i, label_name in enumerate(legends):
         yield {"supercategory": "none", "id": i + 1, "name": label_name}
 
 

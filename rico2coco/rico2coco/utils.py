@@ -14,9 +14,14 @@ def get_clickable(component):
     return "not_clickable"
 
 
+def get_iconClass(component):
+    return component.get("iconClass", "background")
+
+
 LABEL_KEYS_EXTRACTOR = {
     "componentLabel": get_componentLabel,
     "clickable": get_clickable,
+    "iconClass": get_iconClass,
 }
 
 
