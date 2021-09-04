@@ -4,7 +4,7 @@ import os.path
 from pycocotools.coco import COCO
 
 COCO_ANNOTATIONS = "../dataset/ricoco_clickable.json"
-IMAGES_PATH = "../rico2coco/rico/dataset/unique_uis/combined"
+IMAGES_PATH = "../rico2coco/rico/dataset/unique_uis/"
 OUTPUT_PATH = "datasets/"
 
 
