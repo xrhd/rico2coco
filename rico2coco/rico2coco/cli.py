@@ -6,9 +6,10 @@ import click
 
 @click.command()
 @click.option("--labelkey", default=rico2coco.LABEL_KEY, help="Directory of images.")
-def run(labelkey):
+@click.option("--output", default="ricoco.json", help="Directory of images.")
+def run(labelkey, output):
     ricoco = rico2coco.run(labelkey)
-    with open("ricoco.json", "w") as f:
+    with open(output, "w") as f:
         json.dump(ricoco, f)
 
 
