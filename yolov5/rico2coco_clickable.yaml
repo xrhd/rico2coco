@@ -6,4 +6,5 @@ val: images/
 
 # Classes
 nc: 2
-names: clickable, not_clickable
+names: ['clickable', 'not_clickable']
+

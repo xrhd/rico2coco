@@ -1,10 +1,11 @@
 import os
 import os.path
 
+from shutil import copyfile
 from pycocotools.coco import COCO
 
 COCO_ANNOTATIONS = "../dataset/ricoco_clickable.json"
-IMAGES_PATH = "../rico2coco/rico/dataset/unique_uis/"
+IMAGES_PATH = "../rico2coco/rico/dataset/combined/"
 OUTPUT_PATH = "datasets/"
 
 
@@ -34,7 +35,8 @@ def main(coco_annotations):
         src = f"{IMAGES_PATH}/{file_name}"
         dst = f"{output_image_path}/{file_name}"
         if not(os.path.exists(dst) or os.path.islink(dst)):
-            os.symlink(src, dst)
+            # os.symlink(src, dst)
+            copyfile(src, dst)
 
     # This is where the annotations will be saved in YOLO format
     output_label_path = f"{OUTPUT_PATH}/labels/"
