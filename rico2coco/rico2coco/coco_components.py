@@ -27,7 +27,7 @@ def get_categories(
 ):
     if label_key == "clickable":
         legends = ["clickable", "not_clickable"]
-    
+
     elif label_key == "iconClass":
         legends = rico_metadata.icon_legend
 
