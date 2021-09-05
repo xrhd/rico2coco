@@ -27,23 +27,23 @@ def main(coco_annotations, image_path, output_path, use_symlink=True):
     imgIds = coco.getImgIds(catIds=catIds)
     images = coco.loadImgs(imgIds)
 
-    # This creates a symbolic link on python in tmp directory
-    output_image_path = f"{output_path}/images/"
-    os.makedirs(output_image_path, exist_ok=True)
+    # # This creates a symbolic link on python in tmp directory
+    # output_image_path = f"{output_path}/images/"
+    # os.makedirs(output_image_path, exist_ok=True)
 
-    for image in tqdm(images):
-        file_name = image["file_name"]
-        src = f"{image_path}/{file_name}"
-        dst = f"{output_image_path}/{file_name}"
+    # for image in tqdm(images):
+    #     file_name = image["file_name"]
+    #     src = f"{image_path}/{file_name}"
+    #     dst = f"{output_image_path}/{file_name}"
 
-        if not os.path.exists(src):
-            raise Exception(f"do not exits: {src}")
+    #     if not os.path.exists(src):
+    #         raise Exception(f"do not exits: {src}")
 
-        # if not (os.path.exists(dst) or os.path.islink(dst)):
-        if use_symlink:
-            os.symlink(src, dst)
-        else:
-            copyfile(src, dst)
+    #     # if not (os.path.exists(dst) or os.path.islink(dst)):
+    #     if use_symlink:
+    #         os.symlink(src, dst)
+    #     else:
+    #         copyfile(src, dst)
 
     # This is where the annotations will be saved in YOLO format
     output_label_path = f"{output_path}/labels/"
