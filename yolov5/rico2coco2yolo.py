@@ -59,6 +59,8 @@ def main(coco_annotations, image_path, output_path, use_symlink=True):
 
         txt_content = []
         for i in range(len(anns)):
+            category_id = anns[i]["category_id"] - 1
+            
             xmin = anns[i]["bbox"][0]
             ymin = anns[i]["bbox"][1]
             xmax = anns[i]["bbox"][2] + anns[i]["bbox"][0]
@@ -75,9 +77,8 @@ def main(coco_annotations, image_path, output_path, use_symlink=True):
             y = y * dh
             h = h * dh
 
-            # Note: This assumes a single-category dataset, and thus the "0" at the beginning of each line.
             mystring = str(
-                "0 "
+                f"{category_id} "
                 + str(truncate(x, 7))
                 + " "
                 + str(truncate(y, 7))
@@ -90,7 +91,7 @@ def main(coco_annotations, image_path, output_path, use_symlink=True):
 
         with open(output_label_path + filename, "w") as myfile:
             for line in txt_content:
-                myfile.write(mystring+"\n")
+                myfile.write(line+"\n")
 
 if __name__ == "__main__":
     main(COCO_ANNOTATIONS, IMAGES_PATH, OUTPUT_PATH, USE_SYMLINK)
