@@ -3,6 +3,7 @@ import os.path
 from shutil import copyfile
 
 from pycocotools.coco import COCO
+from tqdm import tqdm
 
 USE_SYMLINK = True
 COCO_ANNOTATIONS = "../dataset/ricoco_clickable.json"
@@ -25,26 +26,29 @@ def main(coco_annotations, image_path, output_path, use_symlink=True):
     catIds = coco.getCatIds()
     imgIds = coco.getImgIds(catIds=catIds)
     images = coco.loadImgs(imgIds)
-    print(catIds, imgIds)
 
     # This creates a symbolic link on python in tmp directory
     output_image_path = f"{output_path}/images/"
     os.makedirs(output_image_path, exist_ok=True)
 
-    for image in images:
+    for image in tqdm(images):
         file_name = image["file_name"]
         src = f"{image_path}/{file_name}"
         dst = f"{output_image_path}/{file_name}"
-        if not (os.path.exists(dst) or os.path.islink(dst)):
-            if use_symlink:
-                os.symlink(src, dst)
-            else:
-                copyfile(src, dst)
+        
+        if not os.path.exists(src):
+            raise Exception(f"do not exits: {src}")
+
+        # if not (os.path.exists(dst) or os.path.islink(dst)):
+        if use_symlink:
+            os.symlink(src, dst)
+        else:
+            copyfile(src, dst)
 
     # This is where the annotations will be saved in YOLO format
     output_label_path = f"{output_path}/labels/"
     os.makedirs(output_label_path, exist_ok=True)
-    for im in images:
+    for im in tqdm(images):
         dw = 1.0 / im["width"]
         dh = 1.0 / im["height"]
 
@@ -52,42 +56,41 @@ def main(coco_annotations, image_path, output_path, use_symlink=True):
         anns = coco.loadAnns(annIds)
 
         filename = im["file_name"].replace(".jpg", ".txt")
-        print(filename)
 
-        with open(output_label_path + filename, "a") as myfile:
-            for i in range(len(anns)):
-                xmin = anns[i]["bbox"][0]
-                ymin = anns[i]["bbox"][1]
-                xmax = anns[i]["bbox"][2] + anns[i]["bbox"][0]
-                ymax = anns[i]["bbox"][3] + anns[i]["bbox"][1]
+        txt_content = []
+        for i in range(len(anns)):
+            xmin = anns[i]["bbox"][0]
+            ymin = anns[i]["bbox"][1]
+            xmax = anns[i]["bbox"][2] + anns[i]["bbox"][0]
+            ymax = anns[i]["bbox"][3] + anns[i]["bbox"][1]
 
-                x = (xmin + xmax) / 2
-                y = (ymin + ymax) / 2
+            x = (xmin + xmax) / 2
+            y = (ymin + ymax) / 2
 
-                w = xmax - xmin
-                h = ymax - ymin
+            w = xmax - xmin
+            h = ymax - ymin
 
-                x = x * dw
-                w = w * dw
-                y = y * dh
-                h = h * dh
+            x = x * dw
+            w = w * dw
+            y = y * dh
+            h = h * dh
 
-                # Note: This assumes a single-category dataset, and thus the "0" at the beginning of each line.
-                mystring = str(
-                    "0 "
-                    + str(truncate(x, 7))
-                    + " "
-                    + str(truncate(y, 7))
-                    + " "
-                    + str(truncate(w, 7))
-                    + " "
-                    + str(truncate(h, 7))
-                )
-                myfile.write(mystring)
-                myfile.write("\n")
+            # Note: This assumes a single-category dataset, and thus the "0" at the beginning of each line.
+            mystring = str(
+                "0 "
+                + str(truncate(x, 7))
+                + " "
+                + str(truncate(y, 7))
+                + " "
+                + str(truncate(w, 7))
+                + " "
+                + str(truncate(h, 7))
+            )
+            txt_content.append(mystring)
 
-        myfile.close()
-
+        with open(output_label_path + filename, "w") as myfile:
+            for line in txt_content:
+                myfile.write(mystring+"\n")
 
 if __name__ == "__main__":
     main(COCO_ANNOTATIONS, IMAGES_PATH, OUTPUT_PATH, USE_SYMLINK)
