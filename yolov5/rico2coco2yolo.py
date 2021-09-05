@@ -7,7 +7,7 @@ from tqdm import tqdm
 
 USE_SYMLINK = True
 COCO_ANNOTATIONS = "../dataset/ricoco_clickable.json"
-IMAGES_PATH = "../rico2coco/rico/dataset/combined/"
+IMAGES_PATH = os.path.abspath("../rico2coco/rico/dataset/combined/")
 OUTPUT_PATH = "datasets/rico2coco_clickable/"
 
 
@@ -35,7 +35,7 @@ def main(coco_annotations, image_path, output_path, use_symlink=True):
         file_name = image["file_name"]
         src = f"{image_path}/{file_name}"
         dst = f"{output_image_path}/{file_name}"
-        
+
         if not os.path.exists(src):
             raise Exception(f"do not exits: {src}")
 
