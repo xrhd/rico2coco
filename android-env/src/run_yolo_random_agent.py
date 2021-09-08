@@ -15,6 +15,8 @@
 
 """Example script demonstrating usage of AndroidEnv."""
 
+import os
+
 import cv2
 import torch
 from PIL import Image
@@ -62,7 +64,10 @@ def agent():
 def main(_):
   model = agent()
 
-  with open(f"{LOG_PATH}/{DT_STRING}.csv", "a") as f_object:
+  output_path = f"{LOG_PATH}/{FLAGS.task_path.split('/').pop(-1).replace('.textproto', '')}"
+  os.makedirs(output_path, exist_ok = True)
+
+  with open(f"{output_path}/{DT_STRING}.csv", "a") as f_object:
     writer_object = writer(f_object)
 
     for epoch in range(FLAGS.num_epochs):
@@ -120,6 +125,11 @@ def main(_):
           timestep = env.step(action=action)
           action = get_random_action_from_yolo(timestep.observation)
           reward = timestep.reward
+          if reward > 0:
+            image = timestep.observation["pixels"]
+            results = model([image])
+            results.show()
+
           logging.info('Epoch: %r, Step: %r, action: %r, reward: %r', epoch, step, action, reward)
           writer_object.writerow([epoch, step, action, reward])
 
