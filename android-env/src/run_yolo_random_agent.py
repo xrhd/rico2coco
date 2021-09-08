@@ -49,27 +49,11 @@ flags.DEFINE_integer('num_steps', 1000, 'Number of steps to take.')
 def agent():
   # Model
   model = torch.hub.load('ultralytics/yolov5', 'custom', path='rico2coco_click_best.pt')
-
-  # # Images
-  # for f in ['zidane.jpg', 'bus.jpg']:
-  #   torch.hub.download_url_to_file('https://ultralytics.com/images/' + f, f)  # download 2 images
-  # img1 = Image.open('zidane.jpg')  # PIL image
-  # img2 = cv2.imread('bus.jpg')[..., ::-1]  # OpenCV image (BGR to RGB)
-  # imgs = [img1, img2]  # batch of images
-
-  # # Inference
-  # results = model(imgs, size=640)
-
   return model
 
 
 def main(_):
-
   model = agent()
-
-  def get_results(img):
-    results = model([img])
-    return results
 
   with android_env.load(
       emulator_path=FLAGS.emulator_path,
@@ -81,6 +65,44 @@ def main(_):
       run_headless=False) as env:
 
     action_spec = env.action_spec()
+    action_type_dtype = action_spec["action_type"].dtype
+    touch_position_dtyep = action_spec["touch_position"].dtype
+
+    def get_random_action_from_yolo(observation):
+      image = observation["pixels"]
+      results = model([image])
+      pred_df = results.pandas().xyxy[0]
+
+      if (pred_df.shape[0] == 0) and (0 not in pred_df['class']):
+        return {
+          'action_type':  np.random.randint(low=0, high=1, dtype=action_type_dtype), 
+          'touch_position': np.array([.1, .1]).astype(touch_position_dtyep)
+        }
+
+      try:
+        counted = pred_df['class'].value_counts()
+        if 0 not in counted:
+          clickable_weights, not_clickable_weights = 1, 1
+        else:
+          clickable_weights, not_clickable_weights = (0.7*counted[0], 0.3*counted[1]) / counted.sum()
+
+        pred_df['weights'] = np.where(pred_df['class'] == 0, clickable_weights, not_clickable_weights)
+        gui_element = pred_df.sample(n=1, weights='weights').iloc[0]
+        image.shape
+        x = (gui_element.xmin + gui_element.xmax) / (2*image.shape[1])
+        y = (gui_element.ymin + gui_element.ymax) / (2*image.shape[0])
+        return {
+          'action_type':  np.random.randint(low=0, high=3, dtype=action_type_dtype), 
+          'touch_position': np.array([x, y]).astype(touch_position_dtyep)
+        }
+
+      except Exception as e:
+        logging.info(e)
+        return {
+          'action_type':  np.random.randint(low=0, high=1, dtype=action_type_dtype), 
+          'touch_position': np.array([.1, .1]).astype(touch_position_dtyep)
+        }
+        
 
     def get_random_action() -> Dict[str, np.ndarray]:
       """Returns a random AndroidEnv action."""
@@ -93,15 +115,12 @@ def main(_):
       return action
 
     _ = env.reset()
-
+    
+    action = get_random_action()
     for step in range(FLAGS.num_steps):
-      action = get_random_action()
       timestep = env.step(action=action)
-      obs = timestep.observation
-      resuils = get_results(obs['pixels'])
-      print(resuils)
-      resuils.show()
-
+      action = get_random_action_from_yolo(timestep.observation)
+      print(action)
       reward = timestep.reward
       logging.info('Step %r, action: %r, reward: %r', step, action, reward)
 
