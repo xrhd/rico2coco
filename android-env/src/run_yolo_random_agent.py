@@ -18,6 +18,8 @@
 import cv2
 import torch
 from PIL import Image
+from datetime import datetime
+from csv import writer
 
 from typing import Dict
 from absl import app
@@ -43,7 +45,12 @@ flags.DEFINE_string('adb_path',
 flags.DEFINE_string('task_path', None, 'Path to task textproto file.')
 
 # Experiment args.
-flags.DEFINE_integer('num_steps', 1000, 'Number of steps to take.')
+flags.DEFINE_integer('num_steps', 100, 'Number of steps to take.')
+flags.DEFINE_integer('num_epochs', 1, 'Number of steps to take.')
+
+
+LOG_PATH = "./yolov5_agent"
+DT_STRING = datetime.now().strftime("%Y-%m-%d-%H:%M:%S")
 
 
 def agent():
@@ -55,78 +62,72 @@ def agent():
 def main(_):
   model = agent()
 
-  with android_env.load(
-      emulator_path=FLAGS.emulator_path,
-      android_sdk_root=FLAGS.android_sdk_root,
-      android_avd_home=FLAGS.android_avd_home,
-      avd_name=FLAGS.avd_name,
-      adb_path=FLAGS.adb_path,
-      task_path=FLAGS.task_path,
-      run_headless=False) as env:
+  with open(f"{LOG_PATH}/{DT_STRING}.csv", "a") as f_object:
+    writer_object = writer(f_object)
 
-    action_spec = env.action_spec()
-    action_type_dtype = action_spec["action_type"].dtype
-    touch_position_dtyep = action_spec["touch_position"].dtype
+    for epoch in range(FLAGS.num_epochs):
 
-    def get_random_action_from_yolo(observation):
-      image = observation["pixels"]
-      results = model([image])
-      pred_df = results.pandas().xyxy[0]
+      with android_env.load(
+          emulator_path=FLAGS.emulator_path,
+          android_sdk_root=FLAGS.android_sdk_root,
+          android_avd_home=FLAGS.android_avd_home,
+          avd_name=FLAGS.avd_name,
+          adb_path=FLAGS.adb_path,
+          task_path=FLAGS.task_path,
+          run_headless=False) as env:
 
-      if (pred_df.shape[0] == 0) and (0 not in pred_df['class']):
-        return {
+        action_spec = env.action_spec()
+        action_type_dtype = action_spec["action_type"].dtype
+        touch_position_dtyep = action_spec["touch_position"].dtype
+
+
+        NULL_ACTION = {
           'action_type':  np.random.randint(low=0, high=1, dtype=action_type_dtype), 
           'touch_position': np.array([.1, .1]).astype(touch_position_dtyep)
         }
 
-      try:
-        counted = pred_df['class'].value_counts()
-        if 0 not in counted:
-          clickable_weights, not_clickable_weights = 1, 1
-        else:
-          clickable_weights, not_clickable_weights = (0.7*counted[0], 0.3*counted[1]) / counted.sum()
+        def get_random_action_from_yolo(observation=None):
+          if not observation:
+            return NULL_ACTION
 
-        pred_df['weights'] = np.where(pred_df['class'] == 0, clickable_weights, not_clickable_weights)
-        gui_element = pred_df.sample(n=1, weights='weights').iloc[0]
-        image.shape
-        x = (gui_element.xmin + gui_element.xmax) / (2*image.shape[1])
-        y = (gui_element.ymin + gui_element.ymax) / (2*image.shape[0])
-        return {
-          'action_type':  np.random.randint(low=0, high=3, dtype=action_type_dtype), 
-          'touch_position': np.array([x, y]).astype(touch_position_dtyep)
-        }
+          image = observation["pixels"]
+          results = model([image])
+          pred_df = results.pandas().xyxy[0]
 
-      except Exception as e:
-        logging.info(e)
-        return {
-          'action_type':  np.random.randint(low=0, high=1, dtype=action_type_dtype), 
-          'touch_position': np.array([.1, .1]).astype(touch_position_dtyep)
-        }
-        
+          try:
+            counted = pred_df['class'].value_counts()
+            if 0 not in counted:
+              clickable_weights, not_clickable_weights = 1, 1
+            else:
+              clickable_weights, not_clickable_weights = (0.7*counted[0], 0.3*counted[1]) / counted.sum()
 
-    def get_random_action() -> Dict[str, np.ndarray]:
-      """Returns a random AndroidEnv action."""
-      action = {}
-      for k, v in action_spec.items():
-        if isinstance(v, specs.DiscreteArray):
-          action[k] = np.random.randint(low=0, high=v.num_values, dtype=v.dtype)
-        else:
-          action[k] = np.random.random(size=v.shape).astype(v.dtype)
-      return action
+            pred_df['weights'] = np.where(pred_df['class'] == 0, clickable_weights, not_clickable_weights)
+            gui_element = pred_df.sample(n=1, weights='weights').iloc[0]
+            image.shape
+            x = (gui_element.xmin + gui_element.xmax) / (2*image.shape[1])
+            y = (gui_element.ymin + gui_element.ymax) / (2*image.shape[0])
+            return {
+              'action_type':  np.random.randint(low=0, high=3, dtype=action_type_dtype), 
+              'touch_position': np.array([x, y]).astype(touch_position_dtyep)
+            }
 
-    _ = env.reset()
-    
-    action = get_random_action()
-    for step in range(FLAGS.num_steps):
-      timestep = env.step(action=action)
-      action = get_random_action_from_yolo(timestep.observation)
-      print(action)
-      reward = timestep.reward
-      logging.info('Step %r, action: %r, reward: %r', step, action, reward)
+          except Exception as e:
+            logging.info(e)
+            return NULL_ACTION
+            
+        action = get_random_action_from_yolo()
+        for step in range(FLAGS.num_steps):
+          timestep = env.step(action=action)
+          action = get_random_action_from_yolo(timestep.observation)
+          reward = timestep.reward
+          logging.info('Epoch: %r, Step: %r, action: %r, reward: %r', epoch, step, action, reward)
+          writer_object.writerow([epoch, step, action, reward])
 
 
 
 if __name__ == '__main__':
+  # logging.basicConfig(filename=FLAGS.task_path.replace('.textproto', f'{dt_string}.log'), filemode='a')
+  logging.get_absl_handler().use_absl_log_file(f'{DT_STRING}.log', LOG_PATH)
   logging.set_verbosity('info')
   logging.set_stderrthreshold('info')
   flags.mark_flags_as_required(['avd_name', 'task_path'])
