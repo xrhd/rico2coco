@@ -48,8 +48,7 @@ flags.DEFINE_integer('num_steps', 1000, 'Number of steps to take.')
 
 def agent():
   # Model
-  model = torch.hub.load('ultralytics/yolov5', 'yolov5s')
-  model = torch.load("rico2coco_click_best.pt").get('model')
+  model = torch.hub.load('ultralytics/yolov5', 'custom', path='rico2coco_click_best.pt')
 
   # # Images
   # for f in ['zidane.jpg', 'bus.jpg']:
@@ -101,6 +100,7 @@ def main(_):
       obs = timestep.observation
       resuils = get_results(obs['pixels'])
       print(resuils)
+      resuils.show()
 
       reward = timestep.reward
       logging.info('Step %r, action: %r, reward: %r', step, action, reward)
