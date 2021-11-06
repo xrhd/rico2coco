@@ -1,0 +1,2 @@
+{names: [clickable, not_clickable], nc: 2, path: new_dataset/rico2coco_clickable/,
+  test: images/test/, train: images/train/, val: images/val/}
