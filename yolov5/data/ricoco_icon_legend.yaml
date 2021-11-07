@@ -1,0 +1,12 @@
+{names: [shop, expand_less, help, photo, switcher, attach_file, follow, font, layers,
+    pause, group, menu, flash, send, add, swap, folder, save, expand_more, date_range,
+    facebook, av_rewind, gift, settings, edit, skip_next, list, refresh, avatar, dialpad,
+    globe, bluetooth, close, fullscreen, thumbs_up, label, reply, email, power, undo,
+    explore, cart, videocam, search, launch, arrow_backward, favorite, filter, delete,
+    navigation, file_download, weather, network_wifi, redo, emoji, playlist, bookmark,
+    music, call, twitter, location, flight, visibility, volume, notifications, av_forward,
+    location_crosshair, copy, info, skip_previous, arrow_downward, dashboard, more,
+    minus, history, compare, lock, national_flag, share, warning, chat, home, arrow_forward,
+    check, microphone, sliders, book, build, play, repeat, star, description, wallpaper,
+    arrow_upward, filter_list, thumbs_down, time], nc: 97, path: new_dataset/ricoco_icon_legend/,
+  test: images/test/, train: images/train/, val: images/val/}

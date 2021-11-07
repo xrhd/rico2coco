@@ -1,0 +1,5 @@
+{names: [Web View, List Item, Multi-Tab, Input, Text Button, Slider, Background Image,
+    Advertisement, Card, Bottom Navigation, Modal, On/Off Switch, Button Bar, Number
+      Stepper, Text, Map View, Checkbox, Date Picker, Image, Drawer, Radio Button,
+    Video, Toolbar, Pager Indicator], nc: 24, path: new_dataset/ricoco/, test: images/test/,
+  train: images/train/, val: images/val/}
