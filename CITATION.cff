@@ -4,8 +4,8 @@ authors:
   - family-names: Degaki 
     given-names: Richard
     orcid: https://orcid.org/0000-0003-1950-3700
-    title: "Real Time Detection of Mobile Graphical User Interface Elements Using Convolutional Neural Networks"
+title: "Rico2coco"
 version: 0.1.0
-doi: 10.1145/3539637.3558044
 date-released: 2022-11-07
+url: "https://github.com/xrhd/_rico2coco"
 
